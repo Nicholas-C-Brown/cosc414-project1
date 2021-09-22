@@ -1,23 +1,72 @@
 <div class="scene">
-  <div class="scene-top">
-    <h2>COSC 414 Project 1</h2>
+  <h2>COSC 414 Project 1</h2>
+  <div class="scene-canvas">
     <canvas #sceneCanvas width="{{canvasDimensions.x}}" height="{{canvasDimensions.y}}">
       Your browser doesn't appear to support the
       <code>&lt;canvas&gt;</code> element.
     </canvas>
   </div>
-  <div class="scene-bottom">
-    <p>Resolution: </p>
-    <mat-slider
-      class="scene-slider"
-      #slider
-      thumbLabel
-      step="1"
-      min="3"
-      max="50"
-      [value]="circleResolution"
-      (input)="updateCanvas(slider)"
-    ></mat-slider>
+  <div class="scene-sliders">
+    <div class="scene-sliders__scene-slider">
+      <p>Resolution: </p>
+      <mat-slider
+        #resslider
+        thumbLabel
+        step="1"
+        min="3"
+        max="50"
+        [value]="circleResolution"
+        (input)="
+          circleResolution = resslider.value;
+          updateCanvas();
+        "
+      ></mat-slider>
+    </div>
+    <div class="scene-sliders__scene-slider">
+      <p>Radius: </p>
+      <mat-slider
+        #radslider
+        thumbLabel
+        step="1"
+        min="1"
+        max="500"
+        [value]="circleRadius"
+        (input)="
+          circleRadius = radslider.value;
+          updateCanvas();
+        "
+      ></mat-slider>
+    </div>
+    <div class="scene-sliders__scene-slider">
+      <p>X: </p>
+      <mat-slider
+        #xslider
+        thumbLabel
+        step="1"
+        min="0"
+        [max]="canvasDimensions.x"
+        [value]="circleDimensions.x"
+        (input)="
+          circleDimensions.x = xslider.value;
+          updateCanvas();
+        "
+      ></mat-slider>
+    </div>
+    <div class="scene-sliders__scene-slider">
+      <p>Y: </p>
+      <mat-slider
+        #yslider
+        thumbLabel
+        step="1"
+        min="0"
+        [max]="canvasDimensions.y"
+        [value]="circleDimensions.y"
+        (input)="
+          circleDimensions.y = yslider.value;
+          updateCanvas();
+        "
+      ></mat-slider>
+    </div>
     <p>Score: 0</p>
   </div>
 </div>

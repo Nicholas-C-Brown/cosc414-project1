@@ -12,9 +12,11 @@ export class SceneComponent implements AfterViewInit {
   canvasClearColor = {r: 0, g: 0, b: 0, a: 1};
 
   circleResolution = 360;
+  circleRadius = 100;
+  circleDimensions = {x: 360, y: 240};
 
   @ViewChild('sceneCanvas') private canvas: ElementRef<HTMLCanvasElement> | undefined;
-  private _renderingContext: CanvasRenderingContext2D | ImageBitmapRenderingContext | WebGLRenderingContext | WebGL2RenderingContext | null | undefined;
+  private _renderingContext: WebGLRenderingContext | null | undefined;
 
   private get gl(): WebGLRenderingContext {
     return this._renderingContext as WebGLRenderingContext;
@@ -50,14 +52,12 @@ export class SceneComponent implements AfterViewInit {
     // Clear the colour as well as the depth buffer.
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-    this.drawCircle(this.circleResolution, 100, this.gl.canvas.width/2, this.gl.canvas.height/2);
+    this.drawCircle(this.circleResolution, this.circleRadius, this.circleDimensions.x, this.circleDimensions.y);
   }
 
-  updateCanvas(slider: MatSlider){
-    this.circleResolution = slider.value;
-    console.log(this.circleResolution);
+  updateCanvas(){
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-    this.drawCircle(this.circleResolution, 100, this.gl.canvas.width/2, this.gl.canvas.height/2);
+    this.drawCircle(this.circleResolution, this.circleRadius, this.circleDimensions.x, this.circleDimensions.y);
   }
 
   private drawCircle(resolution: number, radius: number, x: number, y: number): void {
