@@ -1,8 +1,23 @@
 <div class="scene">
-  <h2>COSC 414 Project 1</h2>
-  <canvas #sceneCanvas width="{{canvasDimensions.x}}" height="{{canvasDimensions.y}}">
-    Your browser doesn't appear to support the
-    <code>&lt;canvas&gt;</code> element.
-  </canvas>
-  <p>Score: 0</p>
+  <div class="scene-top">
+    <h2>COSC 414 Project 1</h2>
+    <canvas #sceneCanvas width="{{canvasDimensions.x}}" height="{{canvasDimensions.y}}">
+      Your browser doesn't appear to support the
+      <code>&lt;canvas&gt;</code> element.
+    </canvas>
+  </div>
+  <div class="scene-bottom">
+    <p>Resolution: </p>
+    <mat-slider
+      class="scene-slider"
+      #slider
+      thumbLabel
+      step="1"
+      min="3"
+      max="50"
+      [value]="circleResolution"
+      (input)="updateCanvas(slider)"
+    ></mat-slider>
+    <p>Score: 0</p>
+  </div>
 </div>

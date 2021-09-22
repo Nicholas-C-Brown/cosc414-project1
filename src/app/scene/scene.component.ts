@@ -1,4 +1,5 @@
 import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {MatSlider} from "@angular/material/slider";
 
 @Component({
   selector: 'app-scene',
@@ -9,6 +10,8 @@ export class SceneComponent implements AfterViewInit {
 
   canvasDimensions = {x: 720, y: 480};
   canvasClearColor = {r: 0, g: 0, b: 0, a: 1};
+
+  circleResolution = 360;
 
   @ViewChild('sceneCanvas') private canvas: ElementRef<HTMLCanvasElement> | undefined;
   private _renderingContext: CanvasRenderingContext2D | ImageBitmapRenderingContext | WebGLRenderingContext | WebGL2RenderingContext | null | undefined;
@@ -47,7 +50,14 @@ export class SceneComponent implements AfterViewInit {
     // Clear the colour as well as the depth buffer.
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-    this.drawCircle(360, 100, this.gl.canvas.width/2, this.gl.canvas.height/2);
+    this.drawCircle(this.circleResolution, 100, this.gl.canvas.width/2, this.gl.canvas.height/2);
+  }
+
+  updateCanvas(slider: MatSlider){
+    this.circleResolution = slider.value;
+    console.log(this.circleResolution);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    this.drawCircle(this.circleResolution, 100, this.gl.canvas.width/2, this.gl.canvas.height/2);
   }
 
   private drawCircle(resolution: number, radius: number, x: number, y: number): void {
@@ -143,8 +153,6 @@ export class SceneComponent implements AfterViewInit {
       positions.push(this.toCanvasCoordinate(pointX, this.gl.canvas.width));
       positions.push(this.toCanvasCoordinate(pointY, this.gl.canvas.height));
     }
-
-    console.log(positions);
 
     this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.STATIC_DRAW);
 
