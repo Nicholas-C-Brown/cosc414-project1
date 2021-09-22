@@ -132,16 +132,16 @@ export class SceneComponent implements AfterViewInit {
     const positions = [];
 
     //Centre point
-    positions.push(this.convertCoordinate(x, this.gl.canvas.width)); //x
-    positions.push(this.convertCoordinate(y, this.gl.canvas.height)); //y
+    positions.push(this.toCanvasCoordinate(x, this.gl.canvas.width)); //x
+    positions.push(this.toCanvasCoordinate(y, this.gl.canvas.height)); //y
 
     for(let i = 0; i<resolution+1; i++){
       let angle = (i * 2 * Math.PI) / resolution;
       let pointX = x + (radius * Math.cos(angle))
       let pointY = y + (radius * -Math.sin(angle));
 
-      positions.push(this.convertCoordinate(pointX, this.gl.canvas.width));
-      positions.push(this.convertCoordinate(pointY, this.gl.canvas.height));
+      positions.push(this.toCanvasCoordinate(pointX, this.gl.canvas.width));
+      positions.push(this.toCanvasCoordinate(pointY, this.gl.canvas.height));
     }
 
     console.log(positions);
@@ -162,8 +162,12 @@ export class SceneComponent implements AfterViewInit {
     this.gl.drawArrays(this.gl.TRIANGLE_FAN, 0, positions.length/2);
   }
 
-  private convertCoordinate(coord: number, resolution: number): number {
-    return (coord - (resolution/2)) / (resolution/2);
+  private toCanvasCoordinate(c: number, resolution: number): number {
+    return (c - (resolution/2)) / (resolution/2);
+  }
+
+  private toScreenCoordinate(c: number, resolution: number): number {
+    return (c * (resolution/2)) + (resolution/2)
   }
 
 }
