@@ -1,12 +1,8 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches: [ "**" ]
+  # Triggers the workflow on push or pull request events
   pull_request:
     branches: [ "**" ]
 
@@ -24,7 +20,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        
+
       - name: Use Node 12.x
         uses: actions/setup-node@v1
         with:
@@ -32,12 +28,12 @@ jobs:
 
       - name: Install Dependencies
         run: npm install
-        
+
       - name: Build
         run: npm run build
-        
+
       - name: Lint
         run: npm run lint
-        
+
       - name: Test
-        run: npm run test
+        run: npm run test-ci
