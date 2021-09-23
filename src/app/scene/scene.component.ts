@@ -56,7 +56,7 @@ export class SceneComponent implements AfterViewInit {
     this.drawCircle(this.circleResolution, this.circleRadius, this.circleDimensions.x, this.circleDimensions.y);
   }
 
-  updateCanvas(){
+  updateCanvas(): void {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     this.drawCircle(this.circleResolution, this.circleRadius, this.circleDimensions.x, this.circleDimensions.y);
   }
@@ -79,7 +79,9 @@ export class SceneComponent implements AfterViewInit {
     this.gl.compileShader(vertexShader);
 
     if (!this.gl.getShaderParameter(vertexShader, this.gl.COMPILE_STATUS)) {
-      console.log('An error occurred compiling the vertex shader: ' + this.gl.getShaderInfoLog(vertexShader));
+      console.log(
+        ['An error occurred compiling the vertex shader: ', this.gl.getShaderInfoLog(vertexShader)].join('/n')
+      );
       this.gl.deleteShader(vertexShader);
       return;
     }
@@ -102,7 +104,9 @@ export class SceneComponent implements AfterViewInit {
     this.gl.compileShader(fragmentShader);
 
     if (!this.gl.getShaderParameter(fragmentShader, this.gl.COMPILE_STATUS)) {
-      console.log('An error occurred compiling the fragment shader: ' + this.gl.getShaderInfoLog(fragmentShader));
+      console.log(
+        ['An error occurred compiling the fragment shader: ', this.gl.getShaderInfoLog(fragmentShader)].join('\n')
+      );
       this.gl.deleteShader(fragmentShader);
       return;
     }
@@ -119,7 +123,9 @@ export class SceneComponent implements AfterViewInit {
     this.gl.linkProgram(circleProgram);
 
     if (!this.gl.getProgramParameter(circleProgram, this.gl.LINK_STATUS)) {
-      console.log('Unable to initialize the circle shader program: ' + this.gl.getProgramInfoLog(circleProgram));
+      console.log(
+        ['Unable to initialize the circle shader program: ', this.gl.getProgramInfoLog(circleProgram)].join('\n')
+      );
       return;
     }
 
@@ -147,9 +153,9 @@ export class SceneComponent implements AfterViewInit {
     positions.push(this.toCanvasCoordinate(y, this.gl.canvas.height)); //y
 
     for(let i = 0; i<resolution+1; i++){
-      let angle = (i * 2 * Math.PI) / resolution;
-      let pointX = x + (radius * Math.cos(angle))
-      let pointY = y + (radius * -Math.sin(angle));
+      const angle = (i * 2 * Math.PI) / resolution;
+      const pointX = x + (radius * Math.cos(angle))
+      const pointY = y + (radius * -Math.sin(angle));
 
       positions.push(this.toCanvasCoordinate(pointX, this.gl.canvas.width));
       positions.push(this.toCanvasCoordinate(pointY, this.gl.canvas.height));
