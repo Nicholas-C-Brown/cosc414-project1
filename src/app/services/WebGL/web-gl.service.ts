@@ -108,7 +108,7 @@ export abstract class WebGLService {
       && this.buffer != null;
   }
 
-  protected updateContext(){
+  protected updateContext(): void {
     this.gl.useProgram(this.program);
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
   }
