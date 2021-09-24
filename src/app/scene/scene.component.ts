@@ -7,6 +7,8 @@ import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 })
 export class SceneComponent implements AfterViewInit {
 
+  title = "COSC 414 Project 1";
+
   canvasDimensions = {x: 720, y: 480};
   canvasClearColor = {r: 0, g: 0, b: 0, a: 1};
 
