@@ -71,6 +71,49 @@ export abstract class WebGLService {
   }
 
   /**
+   * Initializes all of the service's WebGL components
+   * @private
+   * @return boolean specifies whether initialization was successful
+   */
+  protected initialize(vertexSrc: string, fragmentSrc: string): boolean {
+    if(this.isInitialized()){
+      return true;
+    }
+
+    //Initialize Shaders
+    this.initializeShader(this.gl.VERTEX_SHADER, vertexSrc);
+    this.initializeShader(this.gl.FRAGMENT_SHADER, fragmentSrc);
+
+    if(!this.vertexShader || !this.fragmentShader){
+      return false;
+    }
+
+    //Initialize Program
+    this.initializeProgram(this.vertexShader, this.fragmentShader);
+
+    if(!this.program){
+      return false;
+    }
+
+    this.initializeBuffer();
+
+    return this.buffer != null;
+  }
+
+  private isInitialized(): boolean {
+    return this.gl != null
+      && this.vertexShader != null
+      && this.fragmentShader != null
+      && this.program != null
+      && this.buffer != null;
+  }
+
+  protected updateContext(){
+    this.gl.useProgram(this.program);
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
+  }
+
+  /**
    * Used to initialize the service's vertex and fragment shaders ({@link WebGLShader})
    * @param type the shader type - either {@link VERTEX_SHADER} or {@link FRAGMENT_SHADER}
    * @param src the shader source code
