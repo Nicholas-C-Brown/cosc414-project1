@@ -184,6 +184,6 @@ export class SceneComponent implements AfterViewInit {
   private toScreenCoordinate(c: number, resolution: number): number {
     return (c * (resolution/2)) + (resolution/2)
   }
-  //Amelia
+  
 
 }
