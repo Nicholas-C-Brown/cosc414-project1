@@ -35,8 +35,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss",
-              "@angular/material/prebuilt-themes/purple-green.css"
+              "src/styles.scss"
             ],
             "scripts": [],
             "customWebpackConfig": {

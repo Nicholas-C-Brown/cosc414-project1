@@ -1,5 +1,3 @@
-import {C} from "@angular/cdk/keycodes";
-
 export class Color {
   r: number;
   g: number;
