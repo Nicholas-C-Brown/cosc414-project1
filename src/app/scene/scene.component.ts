@@ -11,6 +11,8 @@ import {Circle} from "../../models/circle";
 })
 export class SceneComponent implements AfterViewInit {
 
+  running: boolean;
+
   canvasSize = new Vector2(720, 480);
   canvasColor = Color.Black;
 
@@ -22,8 +24,8 @@ export class SceneComponent implements AfterViewInit {
 
   @ViewChild('sceneCanvas') private canvas: ElementRef<HTMLCanvasElement> | undefined;
 
-  constructor(public circleDrawer: CircleDrawerService) {
-    //empty
+  constructor(private circleDrawer: CircleDrawerService) {
+    this.running = true;
   }
 
   ngAfterViewInit(): void {
@@ -38,13 +40,27 @@ export class SceneComponent implements AfterViewInit {
       return;
     }
 
-    //Draw Circle
-    this.circleDrawer.drawCircle(this.circle);
+    this.gameLoop();
+    console.log("Game has ended");
   }
 
-  updateCanvas(): void {
+  private gameLoop(): void {
+    //Clear scene
     this.circleDrawer.clearCanvas();
+
+    //Draw Petri Dish
     this.circleDrawer.drawCircle(this.circle);
+
+    let rX = (-0.5 + Math.random()) * 2;
+    let rY = (-0.5 + Math.random()) * 3;
+
+    this.circle.location.x += rX;
+    this.circle.location.y += rY;
+
+    if(this.running) {
+      requestAnimationFrame(() => this.gameLoop());
+    }
+
   }
 
 }
