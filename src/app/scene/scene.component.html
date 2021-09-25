@@ -1,7 +1,14 @@
 <div class="scene">
-  <canvas #sceneCanvas class="scene__canvas" width="{{canvasDimensions.x}}" height="{{canvasDimensions.y}}">
-    Your browser doesn't appear to support the
-    <code>&lt;canvas&gt;</code> element.
-  </canvas>
-  <p>Score: 0</p>
+  <div class="scene__left">
+    <div class="scene__canvas-container">
+      <canvas #sceneCanvas class="scene__canvas" width="{{canvasSize.x}}" height="{{canvasSize.y}}">
+        Your browser doesn't appear to support the
+        <code>&lt;canvas&gt;</code> element.
+      </canvas>
+    </div>
+    <app-score></app-score>
+  </div>
+  <div class="scene__right">
+    <app-info></app-info>
+  </div>
 </div>

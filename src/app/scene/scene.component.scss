@@ -1,6 +1,17 @@
 .scene {
-  padding-left: 6rem;
-  padding-top: 2rem;
+  padding: 2rem 6rem;
+  display: flex;
+  flex-direction: row;
+
+  &__left {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__right {
+    flex-grow: 2;
+  }
+
 
   &__canvas {
     border: gray solid 2px;
