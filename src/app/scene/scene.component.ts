@@ -3,6 +3,8 @@ import {Vector2} from "../../models/vector2";
 import {Color} from "../../models/color";
 import {CircleDrawerService} from "../services/CircleDrawer/circle-drawer.service";
 import {Circle} from "../../models/circle";
+import {getCircumferencePoint} from "../../functions/Perimeter circles";
+import {Bacteria} from "../../models/bacteria";
 
 @Component({
   selector: 'app-scene',
@@ -22,10 +24,13 @@ export class SceneComponent implements AfterViewInit {
     Color.White
   );
 
+  bacteria: Bacteria[];
+
   @ViewChild('sceneCanvas') private canvas: ElementRef<HTMLCanvasElement> | undefined;
 
   constructor(private circleDrawer: CircleDrawerService) {
     this.running = true;
+    this.bacteria = [];
   }
 
   ngAfterViewInit(): void {
@@ -40,6 +45,19 @@ export class SceneComponent implements AfterViewInit {
       return;
     }
 
+    for(let i = 0; i < 5; i++){
+      const B = new Bacteria(
+        50,
+        0,
+        getCircumferencePoint(this.circle),
+        new Color(Math.random(),Math.random(),Math.random(),1),
+        0.1,
+        40
+      );
+
+      this.bacteria.push(B);
+    }
+
     this.gameLoop();
     console.log("Game has ended");
   }
@@ -51,16 +69,27 @@ export class SceneComponent implements AfterViewInit {
     //Draw Petri Dish
     this.circleDrawer.drawCircle(this.circle);
 
-    let rX = (-0.5 + Math.random()) * 2;
-    let rY = (-0.5 + Math.random()) * 3;
+    const remove: Bacteria[] = [];
 
-    this.circle.location.x += rX;
-    this.circle.location.y += rY;
+    for(const b of this.bacteria){
+      b.update();
+      if (!b.alive)
+        this.gameOver()
+      this.circleDrawer.drawCircle(b);
+    }
+
+    // for(const b of remove){
+    //   const index = this.bacteria.indexOf(b);
+    //   this.bacteria.splice(index, 1);
+    // }
 
     if(this.running) {
       requestAnimationFrame(() => this.gameLoop());
     }
 
+  }
+  private gameOver() {
+    this.running = false;
   }
 
 }
