@@ -3,7 +3,7 @@ import {Vector2} from "../../models/vector2";
 import {Color} from "../../models/color";
 import {CircleDrawerService} from "../services/CircleDrawer/circle-drawer.service";
 import {Circle} from "../../models/circle";
-import {getCircumferencePoint} from "../../functions/Perimeter circles";
+import {getCircumferencePoint} from "../../functions/circumference";
 import {Bacteria} from "../../models/bacteria";
 
 @Component({
@@ -19,7 +19,7 @@ export class SceneComponent implements AfterViewInit {
   canvasColor = Color.Black;
 
   circle = new Circle(
-    360, 100,
+    50, 180,
     new Vector2(360, 240),
     Color.White
   );
@@ -45,21 +45,10 @@ export class SceneComponent implements AfterViewInit {
       return;
     }
 
-    for(let i = 0; i < 5; i++){
-      const B = new Bacteria(
-        50,
-        0,
-        getCircumferencePoint(this.circle),
-        new Color(Math.random(),Math.random(),Math.random(),1),
-        0.1,
-        40
-      );
 
-      this.bacteria.push(B);
-    }
+    this.startGame();
 
-    this.gameLoop();
-    console.log("Game has ended");
+    console.log("Game over.");
   }
 
   private gameLoop(): void {
@@ -69,27 +58,49 @@ export class SceneComponent implements AfterViewInit {
     //Draw Petri Dish
     this.circleDrawer.drawCircle(this.circle);
 
-    const remove: Bacteria[] = [];
-
+    //Update Bacteria
     for(const b of this.bacteria){
       b.update();
-      if (!b.alive)
+      if (!b.triggerGameover)
         this.gameOver()
       this.circleDrawer.drawCircle(b);
     }
 
-    // for(const b of remove){
-    //   const index = this.bacteria.indexOf(b);
-    //   this.bacteria.splice(index, 1);
-    // }
-
+    //Continue game loop
     if(this.running) {
       requestAnimationFrame(() => this.gameLoop());
     }
 
   }
+
+  private startGame(){
+    this.spawnBacteria(5);
+    this.gameLoop();
+  }
+
   private gameOver() {
     this.running = false;
   }
+
+  private spawnBacteria(count: number){
+
+    //Reset bacteria array
+    this.bacteria = [];
+
+    for(let i = 0; i < count; i++){
+      const B = new Bacteria(
+        50,
+        0,
+        getCircumferencePoint(this.circle),
+        new Color(Math.random(), Math.random(), Math.random(), 1),
+        0.1,
+        50
+      );
+
+      this.bacteria.push(B);
+    }
+
+  }
+
 
 }
