@@ -24,11 +24,5 @@ export function isPointInCircle(pos: Vector2, circle: Circle): boolean {
   const ySqr = Math.pow(pos.y - circle.location.y, 2);
   const dist = Math.sqrt(xSqr + ySqr);
 
-  console.log("Dist: " + dist + " Radius: " + circle.radius);
-
-  if(dist < circle.radius) {
-    return true
-  } else {
-    return false
-  }
+  return dist < circle.radius;
 }
