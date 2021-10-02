@@ -33,4 +33,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          npm run ng -- deploy --base-href=/cosc414-project1/ --name="Nicholas-C-Brown" --email=brown.nicholas360@gmail.com
+          npm run deploy
