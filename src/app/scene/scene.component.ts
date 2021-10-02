@@ -3,8 +3,9 @@ import {Vector2} from "../../models/vector2";
 import {Color} from "../../models/color";
 import {CircleDrawerService} from "../services/CircleDrawer/circle-drawer.service";
 import {Circle} from "../../models/circle";
-import {getCircumferencePoint} from "../../functions/circumference";
+import {getCircumferencePoint, isPointInCircle} from "../../functions/circleFunc";
 import {Bacteria} from "../../models/bacteria";
+import {getCursorPosition} from "../../functions/inputFunc";
 
 @Component({
   selector: 'app-scene',
@@ -14,6 +15,8 @@ import {Bacteria} from "../../models/bacteria";
 export class SceneComponent implements AfterViewInit {
 
   running: boolean;
+  score: number;
+  gameOverText: string;
 
   canvasSize = new Vector2(720, 480);
   canvasColor = Color.Black;
@@ -30,7 +33,9 @@ export class SceneComponent implements AfterViewInit {
 
   constructor(private circleDrawer: CircleDrawerService) {
     this.running = true;
+    this.score = 0;
     this.bacteria = [];
+    this.gameOverText = "";
   }
 
   ngAfterViewInit(): void {
@@ -45,6 +50,7 @@ export class SceneComponent implements AfterViewInit {
       return;
     }
 
+    this.canvas.nativeElement.addEventListener("mousedown", (e) => this.mouseClick(e));
 
     this.startGame();
 
@@ -58,11 +64,31 @@ export class SceneComponent implements AfterViewInit {
     //Draw Petri Dish
     this.circleDrawer.drawCircle(this.circle);
 
+    const remove: Bacteria[] = [];
+
     //Update Bacteria
     for(const b of this.bacteria){
       b.update();
-      if (!b.triggerGameover)
+      if (b.triggerGameover) {
         this.gameOver()
+      } else if(!b.alive){
+        remove.push(b);
+      }
+    }
+
+    //Delete killed bacteria
+    for(const b of remove){
+      const index = this.bacteria.indexOf(b);
+      this.bacteria.splice(index, 1);
+    }
+
+    //Check win condition
+    if(this.bacteria.length == 0){
+      this.win();
+    }
+
+    //Draw Bacteria
+    for(const b of this.bacteria){
       this.circleDrawer.drawCircle(b);
     }
 
@@ -73,16 +99,24 @@ export class SceneComponent implements AfterViewInit {
 
   }
 
-  private startGame(){
+  public startGame(): void{
     this.spawnBacteria(5);
+    this.running = true;
+    this.score = 0;
     this.gameLoop();
   }
 
-  private gameOver() {
+  private gameOver(): void {
     this.running = false;
+    this.gameOverText = "Game over! :(";
   }
 
-  private spawnBacteria(count: number){
+  private win(): void {
+    this.running = false;
+    this.gameOverText = "You win!! :D";
+  }
+
+  private spawnBacteria(count: number): void{
 
     //Reset bacteria array
     this.bacteria = [];
@@ -90,7 +124,7 @@ export class SceneComponent implements AfterViewInit {
     for(let i = 0; i < count; i++){
       const B = new Bacteria(
         100,
-        0,
+        5,
         getCircumferencePoint(this.circle),
         new Color(Math.random(), Math.random(), Math.random(), 1),
         0.1,
@@ -98,6 +132,22 @@ export class SceneComponent implements AfterViewInit {
       );
 
       this.bacteria.push(B);
+    }
+
+  }
+
+  private mouseClick(e: MouseEvent): void {
+    if(!this.canvas) return;
+
+    const pos = getCursorPosition(this.canvas.nativeElement, e);
+
+    for(let i = 0; i<=this.bacteria.length-1; i++) {
+      const b = this.bacteria[this.bacteria.length-1-i];
+      if(isPointInCircle(pos, b)){
+        b.die();
+        this.score++;
+        return;
+      }
     }
 
   }
