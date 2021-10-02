@@ -19,7 +19,7 @@ export class SceneComponent implements AfterViewInit {
   canvasColor = Color.Black;
 
   circle = new Circle(
-    50, 180,
+    100, 180,
     new Vector2(360, 240),
     Color.White
   );
@@ -89,7 +89,7 @@ export class SceneComponent implements AfterViewInit {
 
     for(let i = 0; i < count; i++){
       const B = new Bacteria(
-        50,
+        100,
         0,
         getCircumferencePoint(this.circle),
         new Color(Math.random(), Math.random(), Math.random(), 1),

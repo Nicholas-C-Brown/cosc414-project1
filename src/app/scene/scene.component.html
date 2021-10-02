@@ -6,11 +6,9 @@
         <code>&lt;canvas&gt;</code> element.
       </canvas>
     </div>
-    <app-score></app-score>
+    <app-score [running]="running"></app-score>
   </div>
   <div class="scene__right">
     <app-info></app-info>
   </div>
-  <p>Score: 0</p>
-  <p *ngIf="!running">Game over! :(</p>
 </div>
