@@ -6,6 +6,7 @@ import {Circle} from "../../models/circle";
 import {getCircumferencePoint, isPointInCircle} from "../../functions/circleFunc";
 import {Bacteria} from "../../models/bacteria";
 import {getCursorPosition} from "../../functions/inputFunc";
+import {ExplosionParticle} from "../../models/explosionParticle";
 
 @Component({
   selector: 'app-scene',
@@ -28,6 +29,7 @@ export class SceneComponent implements AfterViewInit {
   );
 
   bacteria: Bacteria[];
+  explosionParticle: ExplosionParticle[];
 
   @ViewChild('sceneCanvas') private canvas: ElementRef<HTMLCanvasElement> | undefined;
 
@@ -36,6 +38,7 @@ export class SceneComponent implements AfterViewInit {
     this.score = 0;
     this.bacteria = [];
     this.gameOverText = "";
+    this.explosionParticle = [];
   }
 
   ngAfterViewInit(): void {
@@ -64,32 +67,49 @@ export class SceneComponent implements AfterViewInit {
     //Draw Petri Dish
     this.circleDrawer.drawCircle(this.circle);
 
-    const remove: Bacteria[] = [];
+    const removeBacteria: Bacteria[] = [];
 
     //Update Bacteria
     for(const b of this.bacteria){
       b.update();
       if (b.triggerGameover) {
-        this.gameOver()
+        //this.gameOver()
       } else if(!b.alive){
-        remove.push(b);
+        removeBacteria.push(b);
       }
     }
 
     //Delete killed bacteria
-    for(const b of remove){
+    for(const b of removeBacteria){
       const index = this.bacteria.indexOf(b);
       this.bacteria.splice(index, 1);
     }
 
+    const removeExplosions: ExplosionParticle[] = [];
+
+    for(const e of this.explosionParticle){
+      e.update();
+      if(!e.alive)
+        removeExplosions.push(e);
+    }
+
+    for(const e of removeExplosions){
+      const index = this.explosionParticle.indexOf(e);
+      this.explosionParticle.splice(index, 1);
+    }
+
     //Check win condition
     if(this.bacteria.length == 0){
-      this.win();
+      //this.win();
     }
 
     //Draw Bacteria
     for(const b of this.bacteria){
       this.circleDrawer.drawCircle(b);
+    }
+
+    for(const e of this.explosionParticle){
+      this.circleDrawer.drawCircle(e);
     }
 
     //Continue game loop
@@ -100,7 +120,7 @@ export class SceneComponent implements AfterViewInit {
   }
 
   public startGame(): void{
-    this.spawnBacteria(5);
+    this.spawnBacteria(1);
     this.running = true;
     this.score = 0;
     this.gameLoop();
@@ -135,6 +155,24 @@ export class SceneComponent implements AfterViewInit {
     }
 
   }
+  private createExplosion(count: number, circle: Circle): void {
+    for (let i = 0; i < count; i++) {
+      const direction = new Vector2(-0.5 + Math.random(), -0.5 + Math.random());
+      const E = new ExplosionParticle(
+        100,
+        30,
+        circle.location,
+        circle.color,
+        direction,
+        20,
+        i
+      );
+
+      this.explosionParticle.push(E);
+    }
+
+    //console.log(this.explosionParticle);
+  }
 
   private mouseClick(e: MouseEvent): void {
     if(!this.canvas) return;
@@ -145,6 +183,7 @@ export class SceneComponent implements AfterViewInit {
       const b = this.bacteria[this.bacteria.length-1-i];
       if(isPointInCircle(pos, b)){
         b.die();
+        this.createExplosion(2, b);
         this.score++;
         return;
       }
