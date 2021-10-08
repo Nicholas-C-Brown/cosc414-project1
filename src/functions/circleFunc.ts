@@ -28,3 +28,10 @@ export function dist(pos1: Vector2, pos2: Vector2): number{
   const ySqr = Math.pow(pos1.y - pos2.y, 2);
   return Math.sqrt(xSqr + ySqr);
 }
+
+export function norm(v: Vector2): Vector2 {
+  //||v|| = sqrt(x^2 + y^2)
+  const mag = Math.sqrt(v.x * v.x + v.y * v.y);
+
+  return new Vector2(v.x/mag, v.y/mag);
+}

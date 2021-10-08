@@ -3,7 +3,7 @@ import {Vector2} from "../../models/vector2";
 import {Color} from "../../models/color";
 import {CircleDrawerService} from "../services/CircleDrawer/circle-drawer.service";
 import {Circle} from "../../models/circle";
-import {getCircumferencePoint, isPointInCircle} from "../../functions/circleFunc";
+import {getCircumferencePoint, isPointInCircle, norm} from "../../functions/circleFunc";
 import {Bacteria} from "../../models/bacteria";
 import {getCursorPosition} from "../../functions/inputFunc";
 import {ExplosionParticle} from "../../models/explosionParticle";
@@ -73,7 +73,7 @@ export class SceneComponent implements AfterViewInit {
     for(const b of this.bacteria){
       b.update();
       if (b.triggerGameover) {
-        //this.gameOver()
+        this.gameOver()
       } else if(!b.alive){
         removeBacteria.push(b);
       }
@@ -100,7 +100,7 @@ export class SceneComponent implements AfterViewInit {
 
     //Check win condition
     if(this.bacteria.length == 0){
-      //this.win();
+      this.win();
     }
 
     //Draw Bacteria
@@ -120,7 +120,7 @@ export class SceneComponent implements AfterViewInit {
   }
 
   public startGame(): void{
-    this.spawnBacteria(1);
+    this.spawnBacteria(5);
     this.running = true;
     this.score = 0;
     this.gameLoop();
@@ -128,11 +128,13 @@ export class SceneComponent implements AfterViewInit {
 
   private gameOver(): void {
     this.running = false;
+    this.explosionParticle = [];
     this.gameOverText = "Game over! :(";
   }
 
   private win(): void {
     this.running = false;
+    this.explosionParticle = [];
     this.gameOverText = "You win!! :D";
   }
 
@@ -148,24 +150,27 @@ export class SceneComponent implements AfterViewInit {
         getCircumferencePoint(this.circle),
         new Color(Math.random(), Math.random(), Math.random(), 1),
         0.1,
-        50
+        75
       );
 
       this.bacteria.push(B);
     }
 
   }
-  private createExplosion(count: number, circle: Circle): void {
-    for (let i = 0; i < count; i++) {
-      const direction = new Vector2(-0.5 + Math.random(), -0.5 + Math.random());
+  private createExplosion(particles: number, circle: Circle): void {
+    for (let i = 0; i < particles; i++) {
+      const direction = norm(new Vector2(-0.5 + Math.random(), -0.5 + Math.random()));
+      const location = new Vector2(circle.location.x, circle.location.y);
+      const radius = circle.radius - 5;
+      const speed = circle.radius/10;
+
       const E = new ExplosionParticle(
         100,
-        30,
-        circle.location,
+        radius,
+        location,
         circle.color,
         direction,
-        20,
-        i
+        speed,
       );
 
       this.explosionParticle.push(E);
@@ -175,15 +180,15 @@ export class SceneComponent implements AfterViewInit {
   }
 
   private mouseClick(e: MouseEvent): void {
-    if(!this.canvas) return;
+    if(!this.canvas || !this.running) return;
 
     const pos = getCursorPosition(this.canvas.nativeElement, e);
 
     for(let i = 0; i<=this.bacteria.length-1; i++) {
       const b = this.bacteria[this.bacteria.length-1-i];
       if(isPointInCircle(pos, b)){
+        this.createExplosion(15, b);
         b.die();
-        this.createExplosion(2, b);
         this.score++;
         return;
       }
