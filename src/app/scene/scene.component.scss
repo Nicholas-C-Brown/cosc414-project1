@@ -32,4 +32,11 @@
     align-items: flex-end;
   }
 
+  &__lives {
+    font-size: 1.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
 }

@@ -16,7 +16,15 @@ import {ExplosionParticle} from "../../models/explosionParticle";
 export class SceneComponent implements AfterViewInit {
 
   running: boolean;
+  gameover: boolean;
   score: number;
+  winScore: number;
+  lives: number;
+  startLives: number;
+  spawnChance: number;
+  growthRate: number;
+  startSpawnChance: number;
+  spawnChanceGrowth: number;
   gameOverText: string;
 
   canvasSize = new Vector2(720, 480);
@@ -34,8 +42,16 @@ export class SceneComponent implements AfterViewInit {
   @ViewChild('sceneCanvas') private canvas: ElementRef<HTMLCanvasElement> | undefined;
 
   constructor(private circleDrawer: CircleDrawerService) {
-    this.running = true;
+    this.running = false;
+    this.gameover = false;
     this.score = 0;
+    this.winScore = 25;
+    this.lives = 0;
+    this.startLives = 2;
+    this.startSpawnChance = 0.04;
+    this.spawnChanceGrowth = 0.001;
+    this.growthRate = 0.3;
+    this.spawnChance = this.startSpawnChance;
     this.bacteria = [];
     this.gameOverText = "";
     this.explosionParticle = [];
@@ -55,34 +71,46 @@ export class SceneComponent implements AfterViewInit {
 
     this.canvas.nativeElement.addEventListener("mousedown", (e) => this.mouseClick(e));
 
-    this.startGame();
-
     console.log("Game over.");
   }
 
-  private gameLoop(): void {
+  public gameLoop(): void {
     //Clear scene
     this.circleDrawer.clearCanvas();
 
     //Draw Petri Dish
     this.circleDrawer.drawCircle(this.circle);
 
-    const removeBacteria: Bacteria[] = [];
+    //Spawn bacteria
+    if(!this.gameover) {
 
-    //Update Bacteria
-    for(const b of this.bacteria){
-      b.update();
-      if (b.triggerGameover) {
-        this.gameOver()
-      } else if(!b.alive){
-        removeBacteria.push(b);
+      const chance = Math.random();
+
+      if (chance < this.spawnChance){
+        this.spawnBacteria(1);
+        this.spawnChance += this.spawnChanceGrowth;
       }
     }
 
-    //Delete killed bacteria
-    for(const b of removeBacteria){
-      const index = this.bacteria.indexOf(b);
-      this.bacteria.splice(index, 1);
+    const removeBacteria: Bacteria[] = [];
+
+    if(!this.gameover) {
+      //Update Bacteria
+      for (const b of this.bacteria) {
+        b.update();
+        if (b.triggerGameover) {
+          this.lives--;
+          removeBacteria.push(b);
+        } else if (!b.alive) {
+          removeBacteria.push(b);
+        }
+      }
+
+      //Delete killed bacteria
+      for (const b of removeBacteria) {
+        const index = this.bacteria.indexOf(b);
+        this.bacteria.splice(index, 1);
+      }
     }
 
     const removeExplosions: ExplosionParticle[] = [];
@@ -98,8 +126,13 @@ export class SceneComponent implements AfterViewInit {
       this.explosionParticle.splice(index, 1);
     }
 
+    //Check gameover condition
+    if(this.lives <= 0){
+      this.gameOver();
+    }
+
     //Check win condition
-    if(this.bacteria.length == 0){
+    if(this.score >= this.winScore){
       this.win();
     }
 
@@ -120,28 +153,26 @@ export class SceneComponent implements AfterViewInit {
   }
 
   public startGame(): void{
-    this.spawnBacteria(5);
+    this.bacteria = [];
+    this.explosionParticle = [];
     this.running = true;
+    this.gameover = false;
     this.score = 0;
-    this.gameLoop();
+    this.lives = this.startLives;
+    this.spawnChance = this.startSpawnChance;
   }
 
   private gameOver(): void {
-    this.running = false;
-    this.explosionParticle = [];
+    this.gameover = true;
     this.gameOverText = "Game over! :(";
   }
 
   private win(): void {
-    this.running = false;
-    this.explosionParticle = [];
+    this.gameover = true;
     this.gameOverText = "You win!! :D";
   }
 
   private spawnBacteria(count: number): void{
-
-    //Reset bacteria array
-    this.bacteria = [];
 
     for(let i = 0; i < count; i++){
       const B = new Bacteria(
@@ -149,7 +180,7 @@ export class SceneComponent implements AfterViewInit {
         5,
         getCircumferencePoint(this.circle),
         new Color(Math.random(), Math.random(), Math.random(), 1),
-        0.1,
+        this.growthRate,
         75
       );
 
@@ -161,14 +192,20 @@ export class SceneComponent implements AfterViewInit {
     for (let i = 0; i < particles; i++) {
       const direction = norm(new Vector2(-0.5 + Math.random(), -0.5 + Math.random()));
       const location = new Vector2(circle.location.x, circle.location.y);
-      const radius = circle.radius - 5;
-      const speed = circle.radius/10;
+      const radius = circle.radius/3;
+      const speed = circle.radius/3;
+      const color = new Color(
+        circle.color.r * (0.7 + Math.random() * 0.3),
+        circle.color.g * (0.7 + Math.random() * 0.3),
+        circle.color.b * (0.7 + Math.random() * 0.3),
+        1
+      )
 
       const E = new ExplosionParticle(
         100,
         radius,
         location,
-        circle.color,
+        color,
         direction,
         speed,
       );
@@ -180,14 +217,18 @@ export class SceneComponent implements AfterViewInit {
   }
 
   private mouseClick(e: MouseEvent): void {
-    if(!this.canvas || !this.running) return;
+    if(!this.canvas || this.gameover) return;
 
     const pos = getCursorPosition(this.canvas.nativeElement, e);
+
+    //Spray poison
+
+
 
     for(let i = 0; i<=this.bacteria.length-1; i++) {
       const b = this.bacteria[this.bacteria.length-1-i];
       if(isPointInCircle(pos, b)){
-        this.createExplosion(15, b);
+        this.createExplosion(250, b);
         b.die();
         this.score++;
         return;
@@ -195,6 +236,22 @@ export class SceneComponent implements AfterViewInit {
     }
 
   }
+
+  public updateWinScore(score: number | undefined): void {
+    if(!score) return;
+    this.winScore = score;
+  }
+
+  public updateLives(lives: number | undefined): void {
+    if(!lives) return;
+    this.startLives = lives;
+  }
+
+  public updateGrowthRate(growth: number | undefined): void {
+    if(!growth) return;
+    this.growthRate = growth;
+  }
+
 
 
 }

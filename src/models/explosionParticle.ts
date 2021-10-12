@@ -1,7 +1,6 @@
 import {Circle} from "./circle";
 import {Vector2} from "./vector2";
 import {Color} from "./color";
-import {dist} from "../functions/circleFunc";
 
 export class ExplosionParticle extends Circle {
 
@@ -19,10 +18,10 @@ export class ExplosionParticle extends Circle {
   }
 
   public update(): void{
-    this.location.x -= this.direction.x * this.speed;
-    this.location.y -= this.direction.y * this.speed;
+    this.location.x -= this.direction.x * (this.speed * (0.25 + Math.random()*0.75));
+    this.location.y -= this.direction.y * (this.speed * (0.25 + Math.random()*0.75));
     if(this.radius > 0)
-      this.radius-=0.5;
+      this.radius-=0.5 + Math.random();
     else this.alive = false;
 
   }
