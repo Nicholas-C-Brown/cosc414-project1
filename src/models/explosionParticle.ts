@@ -1,11 +1,12 @@
 import {Circle} from "./circle";
 import {Vector2} from "./vector2";
 import {Color} from "./color";
-import {Entity} from "./entity";
+import {Entity, EntityType} from "./entity";
 
 export class ExplosionParticle extends Circle implements Entity {
 
   alive: boolean;
+  type: EntityType;
   direction: Vector2;
   speed: number;
   origPos: Vector2;
@@ -14,8 +15,10 @@ export class ExplosionParticle extends Circle implements Entity {
     super(resolution, radius, location, color);
     this.direction = direction;
     this.speed = speed;
-    this.alive = true;
     this.origPos = new Vector2(location.x, location.y);
+
+    this.alive = true;
+    this.type = EntityType.ExplosionParticle;
   }
 
   public update(): void{

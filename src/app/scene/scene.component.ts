@@ -8,6 +8,7 @@ import {Bacteria} from "../../models/bacteria";
 import {getCursorPosition} from "../../functions/inputFunc";
 import {ExplosionParticle} from "../../models/explosionParticle";
 import {GameSettings} from "../../models/gameSettings";
+import {Entity, EntityType} from "../../models/entity";
 
 @Component({
   selector: 'app-scene',
@@ -36,8 +37,8 @@ export class SceneComponent implements AfterViewInit {
     Color.White
   );
 
-  bacteria: Bacteria[];
-  explosionParticle: ExplosionParticle[];
+  entities: Entity[];
+
 
   @ViewChild('sceneCanvas') private canvas: ElementRef<HTMLCanvasElement> | undefined;
 
@@ -51,9 +52,8 @@ export class SceneComponent implements AfterViewInit {
     this.lives = 0;
     this.spawnChance = this.gameSettings.startSpawnChance;
 
-    this.bacteria = [];
+    this.entities = [];
     this.gameOverText = "";
-    this.explosionParticle = [];
   }
 
   ngAfterViewInit(): void {
@@ -85,45 +85,45 @@ export class SceneComponent implements AfterViewInit {
 
       const chance = Math.random();
 
-      if (chance < this.spawnChance && this.bacteria.length < this.gameSettings.spawnCap){
+      if (chance < this.spawnChance){
         this.spawnBacteria();
         this.spawnChance += this.gameSettings.spawnChanceGrowth;
       }
     }
 
-    const removeBacteria: Bacteria[] = [];
+    const removeEntities: Entity[] = [];
 
-    if(!this.gameover) {
-      //Update Bacteria
-      for (const b of this.bacteria) {
+
+    //Update Entities
+    for (const e of this.entities) {
+
+      //Bacteria specific logic
+      if (e.type == EntityType.Bacteria && !this.gameover) {
+        const b = <Bacteria>e;
         b.update();
-        if (b.triggerGameover) {
+        if (b.triggerGameover ) {
           this.lives--;
-          removeBacteria.push(b);
-        } else if (!b.alive) {
-          removeBacteria.push(b);
+          removeEntities.push(b);
         }
       }
 
-      //Delete killed bacteria
-      for (const b of removeBacteria) {
-        const index = this.bacteria.indexOf(b);
-        this.bacteria.splice(index, 1);
+      //Explosion specific logic
+      else if(e.type == EntityType.ExplosionParticle){
+        const ep = <ExplosionParticle>e;
+        e.update();
+      }
+
+      if (!e.alive) {
+        removeEntities.push(e);
       }
     }
 
-    const removeExplosions: ExplosionParticle[] = [];
-
-    for(const e of this.explosionParticle){
-      e.update();
-      if(!e.alive)
-        removeExplosions.push(e);
+    //Delete killed entities
+    for (const e of removeEntities) {
+      const index = this.entities.indexOf(e);
+      this.entities.splice(index, 1);
     }
 
-    for(const e of removeExplosions){
-      const index = this.explosionParticle.indexOf(e);
-      this.explosionParticle.splice(index, 1);
-    }
 
     //Check gameover condition
     if(this.lives <= 0){
@@ -135,13 +135,13 @@ export class SceneComponent implements AfterViewInit {
       this.win();
     }
 
-    //Draw Bacteria
-    for(const b of this.bacteria){
-      this.circleDrawer.drawCircle(b);
-    }
-
-    for(const e of this.explosionParticle){
-      this.circleDrawer.drawCircle(e);
+    //Draw Entities
+    for(const e of this.entities){
+      if(e.type == EntityType.Bacteria){
+        this.circleDrawer.drawCircle(<Bacteria>e);
+      }else if(e.type == EntityType.ExplosionParticle){
+        this.circleDrawer.drawCircle(<ExplosionParticle>e);
+      }
     }
 
     //Continue game loop
@@ -153,8 +153,7 @@ export class SceneComponent implements AfterViewInit {
 
   public startGame(): void{
     console.log(this.gameSettings);
-    this.bacteria = [];
-    this.explosionParticle = [];
+    this.entities = [];
     this.running = true;
     this.gameover = false;
     this.score = 0;
@@ -174,6 +173,15 @@ export class SceneComponent implements AfterViewInit {
 
   private spawnBacteria(): void{
 
+    //Only spawn bacteria if under the cap
+    const bacteria: Bacteria[] = [];
+    for(const e of this.entities){
+      if(e.type == EntityType.Bacteria)
+        bacteria.push(<Bacteria>e);
+    }
+
+    if(bacteria.length >= this.gameSettings.spawnCap) return;
+
     //Create the Bacteria
     const B = new Bacteria(
       100,
@@ -185,8 +193,9 @@ export class SceneComponent implements AfterViewInit {
     );
 
     //Add it to the entity array
-    this.bacteria.push(B);
+    this.entities.push(B);
   }
+
   private createExplosion(particles: number, circle: Circle): void {
     for (let i = 0; i < particles; i++) {
       const direction = norm(new Vector2(-0.5 + Math.random(), -0.5 + Math.random()));
@@ -209,7 +218,7 @@ export class SceneComponent implements AfterViewInit {
         speed,
       );
 
-      this.explosionParticle.push(E);
+      this.entities.push(E);
     }
 
   }
@@ -220,13 +229,19 @@ export class SceneComponent implements AfterViewInit {
     const pos = getCursorPosition(this.canvas.nativeElement, e);
 
     //Spray poison
-    for(let i = 0; i<=this.bacteria.length-1; i++) {
-      const b = this.bacteria[this.bacteria.length-1-i];
-      if(isPointInCircle(pos, b)){
-        this.createExplosion(250, b);
-        b.die();
-        this.score++;
-        return;
+
+
+    //Delete clicked on Bacteria
+    for(let i = 0; i<=this.entities.length-1; i++) {
+      const e = this.entities[this.entities.length - 1 - i];
+      if (e.type == EntityType.Bacteria) {
+        const b = <Bacteria>e;
+        if (isPointInCircle(pos, b)) {
+          this.createExplosion(250, b);
+          b.die();
+          this.score++;
+          return;
+        }
       }
     }
 
