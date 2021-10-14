@@ -74,39 +74,38 @@ export class SceneComponent implements AfterViewInit {
   }
 
   public gameLoop(): void {
-    //Clear scene
-    this.circleDrawer.clearCanvas();
 
-    //Draw Petri Dish
-    this.circleDrawer.drawCircle(this.circle);
+    this.tick();
+    this.render();
 
-    //Spawn bacteria
-    if(!this.gameover) {
-
-      const chance = Math.random();
-
-      if (chance < this.spawnChance){
-        this.spawnBacteria();
-        this.spawnChance += this.gameSettings.spawnChanceGrowth;
-      }
+    //Continue game loop
+    if(this.running) {
+      requestAnimationFrame(() => this.gameLoop());
     }
 
-    const removeEntities: Entity[] = [];
+  }
 
+  private tick(): void {
+    //Spawn bacteria
+    this.spawnBacteria();
+
+    const removeEntities: Entity[] = [];
 
     //Update Entities
     for (const e of this.entities) {
 
       //Bacteria specific logic
-      if (e.type == EntityType.Bacteria && !this.gameover) {
-        const b = <Bacteria>e;
-        b.update();
-        if (b.triggerGameover ) {
-          this.lives--;
-          removeEntities.push(b);
+      if(!this.gameover){
+        if (e.type == EntityType.Bacteria) {
+          const b = <Bacteria>e;
+          b.update();
+          if (b.triggerGameover ) {
+            this.lives--;
+            removeEntities.push(b);
+          }
         }
       }
-
+      
       //Explosion specific logic
       else if(e.type == EntityType.ExplosionParticle){
         const ep = <ExplosionParticle>e;
@@ -124,54 +123,75 @@ export class SceneComponent implements AfterViewInit {
       this.entities.splice(index, 1);
     }
 
-
-    //Check gameover condition
-    if(this.lives <= 0){
-      this.gameOver();
-    }
+    //Check game over condition
+    this.gameOverCheck();
 
     //Check win condition
-    if(this.score >= this.gameSettings.winScore){
-      this.win();
-    }
+    this.winCheck();
+  }
+
+  private render(): void {
+    //Clear scene
+    this.circleDrawer.clearCanvas();
+
+    //Draw Petri Dish
+    this.circleDrawer.drawCircle(this.circle);
 
     //Draw Entities
     for(const e of this.entities){
-      if(e.type == EntityType.Bacteria){
-        this.circleDrawer.drawCircle(<Bacteria>e);
-      }else if(e.type == EntityType.ExplosionParticle){
-        this.circleDrawer.drawCircle(<ExplosionParticle>e);
+      switch (e.type) {
+        case EntityType.Bacteria:
+          this.circleDrawer.drawCircle(<Bacteria>e);
+          break;
+        case EntityType.ExplosionParticle:
+          this.circleDrawer.drawCircle(<ExplosionParticle>e);
+          break;
+        default: break;
       }
     }
-
-    //Continue game loop
-    if(this.running) {
-      requestAnimationFrame(() => this.gameLoop());
-    }
-
   }
 
   public startGame(): void{
-    console.log(this.gameSettings);
+    //Clear entities
     this.entities = [];
-    this.running = true;
     this.gameover = false;
+
+    //Reset game
     this.score = 0;
     this.lives = this.gameSettings.startLives;
     this.spawnChance = this.gameSettings.startSpawnChance;
+
+    //Start the game loop if it isn't already running
+    if(!this.running){
+      this.running = true;
+      this.gameLoop();
+    }
   }
 
-  private gameOver(): void {
-    this.gameover = true;
-    this.gameOverText = "Game over! :(";
+  private gameOverCheck(): void {
+    if(this.lives <= 0) {
+      this.gameover = true;
+      this.gameOverText = "Game over! :(";
+    }
   }
 
-  private win(): void {
-    this.gameover = true;
-    this.gameOverText = "You win!! :D";
+  private winCheck(): void {
+    if(this.score >= this.gameSettings.winScore) {
+      this.gameover = true;
+      this.gameOverText = "You win!! :D";
+    }
   }
 
   private spawnBacteria(): void{
+
+    //Don't spawn bacteria if the game has ended
+    if(!this.gameover) return;
+
+    const chance = Math.random();
+    if (chance >= this.spawnChance) return;
+
+    //Increase spawn chance on successful spawn
+    this.spawnChance += this.gameSettings.spawnChanceGrowth;
 
     //Only spawn bacteria if under the cap
     const bacteria: Bacteria[] = [];
@@ -233,9 +253,9 @@ export class SceneComponent implements AfterViewInit {
 
     //Delete clicked on Bacteria
     for(let i = 0; i<=this.entities.length-1; i++) {
-      const e = this.entities[this.entities.length - 1 - i];
-      if (e.type == EntityType.Bacteria) {
-        const b = <Bacteria>e;
+      const entity = this.entities[this.entities.length - 1 - i];
+      if (entity.type == EntityType.Bacteria) {
+        const b = <Bacteria>entity;
         if (isPointInCircle(pos, b)) {
           this.createExplosion(250, b);
           b.die();
