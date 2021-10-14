@@ -1,12 +1,13 @@
 import {Circle} from "./circle";
 import {Vector2} from "./vector2";
 import {Color} from "./color";
+import {Entity} from "./entity";
 
-export class ExplosionParticle extends Circle {
+export class ExplosionParticle extends Circle implements Entity {
 
+  alive: boolean;
   direction: Vector2;
   speed: number;
-  alive: boolean;
   origPos: Vector2;
 
   constructor(resolution: number, radius: number, location: Vector2, color: Color, direction: Vector2, speed: number) {
@@ -22,8 +23,12 @@ export class ExplosionParticle extends Circle {
     this.location.y -= this.direction.y * (this.speed * (0.25 + Math.random()*0.75));
     if(this.radius > 0)
       this.radius-=0.5 + Math.random();
-    else this.alive = false;
+    else this.die();
 
+  }
+
+  public die(): void {
+    this.alive = false;
   }
 
 }

@@ -1,4 +1,5 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {GameSettings} from "../../models/gameSettings";
 
 @Component({
   selector: 'app-info',
@@ -7,27 +8,50 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 })
 export class InfoComponent {
 
-  @Input() winScore: number | undefined | null;
-  @Input() lives: number | undefined | null;
-  @Input() growthRate: number | undefined | null;
 
-  @Output() scoreUpdater = new EventEmitter<number>();
-  @Output() livesUpdater = new EventEmitter<number>();
-  @Output() growthRateUpdater = new EventEmitter<number>();
+  @Input() gameSettings: GameSettings | undefined | null;
+  @Output() gameSettingsEmitter = new EventEmitter<GameSettings>();
 
-  public updateScore(score: number | null): void {
-    if(!score) return;
-    this.scoreUpdater?.emit(score);
+  public updateSettings(score: number | null, lives: number | null, growthRate: number | null, startSpawnChance: number | null, spawnChanceGrowth: number | null, spawnCap: number | null): void {
+    let tempSettings = new GameSettings(
+      this.gameSettings?.winScore,
+      this.gameSettings?.startLives,
+      this.gameSettings?.growthRate,
+      this.gameSettings?.startSpawnChance,
+      this.gameSettings?.spawnChanceGrowth,
+      this.gameSettings?.spawnCap
+    )
+
+    tempSettings.updateWinScore(score);
+    tempSettings.updateLives(lives);
+    tempSettings.updateGrowthRate(growthRate);
+    tempSettings.updateSpawnChance(startSpawnChance);
+    tempSettings.updateSpawnChanceGrowth(spawnChanceGrowth);
+    tempSettings.updateSpawnCap(spawnCap);
+
+    this.gameSettingsEmitter?.emit(tempSettings);
   }
 
-  public updateLives(lives: number | null): void {
-    if(!lives) return;
-    this.livesUpdater?.emit(lives);
+  public getGrowthRate(): number {
+    if(this.gameSettings?.growthRate){
+      return Math.floor(this.gameSettings.growthRate * 100);
+    }else return 0;
   }
 
-  public updateGrowthRate(growth: number | null): void {
-    if(!growth) return;
-    this.growthRateUpdater?.emit(growth);
+  public getSpawnChance(): number {
+    if(this.gameSettings?.startSpawnChance){
+      return Math.round(this.gameSettings.startSpawnChance * 1000 * 100) / 100;
+    }else return 0;
   }
+
+  public getSpawnChanceGrowth(): number {
+    if(this.gameSettings?.spawnChanceGrowth){
+      return Math.round(this.gameSettings.spawnChanceGrowth * 1000 * 100) / 100;
+    }else return 0;
+  }
+
+
+
+
 
 }

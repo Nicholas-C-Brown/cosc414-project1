@@ -35,12 +35,8 @@
   </div>
   <div class="scene__right">
     <app-info
-      [lives]="startLives"
-      [winScore]="winScore"
-      [growthRate]="growthRate"
-      (scoreUpdater)="updateWinScore($event.valueOf())"
-      (livesUpdater)="updateLives($event.valueOf())"
-      (growthRateUpdater)="updateGrowthRate($event.valueOf())"
+      [gameSettings]="gameSettings"
+      (gameSettingsEmitter)="updateGameSettings($event)"
     ></app-info>
   </div>
 </div>

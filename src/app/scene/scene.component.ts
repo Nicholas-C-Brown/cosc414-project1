@@ -7,6 +7,7 @@ import {getCircumferencePoint, isPointInCircle, norm} from "../../functions/circ
 import {Bacteria} from "../../models/bacteria";
 import {getCursorPosition} from "../../functions/inputFunc";
 import {ExplosionParticle} from "../../models/explosionParticle";
+import {GameSettings} from "../../models/gameSettings";
 
 @Component({
   selector: 'app-scene',
@@ -17,14 +18,13 @@ export class SceneComponent implements AfterViewInit {
 
   running: boolean;
   gameover: boolean;
+
+  gameSettings: GameSettings;
+
   score: number;
-  winScore: number;
   lives: number;
-  startLives: number;
   spawnChance: number;
-  growthRate: number;
-  startSpawnChance: number;
-  spawnChanceGrowth: number;
+
   gameOverText: string;
 
   canvasSize = new Vector2(720, 480);
@@ -44,14 +44,13 @@ export class SceneComponent implements AfterViewInit {
   constructor(private circleDrawer: CircleDrawerService) {
     this.running = false;
     this.gameover = false;
+
+    this.gameSettings = new GameSettings();
+
     this.score = 0;
-    this.winScore = 25;
     this.lives = 0;
-    this.startLives = 2;
-    this.startSpawnChance = 0.04;
-    this.spawnChanceGrowth = 0.001;
-    this.growthRate = 0.3;
-    this.spawnChance = this.startSpawnChance;
+    this.spawnChance = this.gameSettings.startSpawnChance;
+
     this.bacteria = [];
     this.gameOverText = "";
     this.explosionParticle = [];
@@ -86,9 +85,9 @@ export class SceneComponent implements AfterViewInit {
 
       const chance = Math.random();
 
-      if (chance < this.spawnChance){
-        this.spawnBacteria(1);
-        this.spawnChance += this.spawnChanceGrowth;
+      if (chance < this.spawnChance && this.bacteria.length < this.gameSettings.spawnCap){
+        this.spawnBacteria();
+        this.spawnChance += this.gameSettings.spawnChanceGrowth;
       }
     }
 
@@ -132,7 +131,7 @@ export class SceneComponent implements AfterViewInit {
     }
 
     //Check win condition
-    if(this.score >= this.winScore){
+    if(this.score >= this.gameSettings.winScore){
       this.win();
     }
 
@@ -153,13 +152,14 @@ export class SceneComponent implements AfterViewInit {
   }
 
   public startGame(): void{
+    console.log(this.gameSettings);
     this.bacteria = [];
     this.explosionParticle = [];
     this.running = true;
     this.gameover = false;
     this.score = 0;
-    this.lives = this.startLives;
-    this.spawnChance = this.startSpawnChance;
+    this.lives = this.gameSettings.startLives;
+    this.spawnChance = this.gameSettings.startSpawnChance;
   }
 
   private gameOver(): void {
@@ -172,21 +172,20 @@ export class SceneComponent implements AfterViewInit {
     this.gameOverText = "You win!! :D";
   }
 
-  private spawnBacteria(count: number): void{
+  private spawnBacteria(): void{
 
-    for(let i = 0; i < count; i++){
-      const B = new Bacteria(
-        100,
-        5,
-        getCircumferencePoint(this.circle),
-        new Color(Math.random(), Math.random(), Math.random(), 1),
-        this.growthRate,
-        75
-      );
+    //Create the Bacteria
+    const B = new Bacteria(
+      100,
+      5,
+      getCircumferencePoint(this.circle),
+      new Color(Math.random(), Math.random(), Math.random(), 1),
+      this.gameSettings.growthRate,
+      75
+    );
 
-      this.bacteria.push(B);
-    }
-
+    //Add it to the entity array
+    this.bacteria.push(B);
   }
   private createExplosion(particles: number, circle: Circle): void {
     for (let i = 0; i < particles; i++) {
@@ -213,7 +212,6 @@ export class SceneComponent implements AfterViewInit {
       this.explosionParticle.push(E);
     }
 
-    //console.log(this.explosionParticle);
   }
 
   private mouseClick(e: MouseEvent): void {
@@ -222,9 +220,6 @@ export class SceneComponent implements AfterViewInit {
     const pos = getCursorPosition(this.canvas.nativeElement, e);
 
     //Spray poison
-
-
-
     for(let i = 0; i<=this.bacteria.length-1; i++) {
       const b = this.bacteria[this.bacteria.length-1-i];
       if(isPointInCircle(pos, b)){
@@ -237,21 +232,9 @@ export class SceneComponent implements AfterViewInit {
 
   }
 
-  public updateWinScore(score: number | undefined): void {
-    if(!score) return;
-    this.winScore = score;
+  updateGameSettings(settings: GameSettings){
+    if(settings)
+      this.gameSettings = settings;
   }
-
-  public updateLives(lives: number | undefined): void {
-    if(!lives) return;
-    this.startLives = lives;
-  }
-
-  public updateGrowthRate(growth: number | undefined): void {
-    if(!growth) return;
-    this.growthRate = growth;
-  }
-
-
 
 }

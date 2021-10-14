@@ -4,10 +4,10 @@ import {Circle} from "./circle";
 
 export class Bacteria extends Circle{
 
+  alive: boolean;
   growthRate: number;
   maxRadius: number;
   triggerGameover: boolean;
-  alive: boolean;
 
   constructor(resolution: number, radius: number, location: Vector2, color: Color, growthRate: number, maxRadius: number) {
     super(resolution, radius, location, color);
