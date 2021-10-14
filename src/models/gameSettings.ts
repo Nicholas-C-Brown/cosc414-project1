@@ -7,7 +7,7 @@ export class GameSettings {
   spawnChanceGrowth: number;
   spawnCap: number;
 
-  constructor(winScore: number = 25, startLives: number = 2, growthRate: number = 0.3, startSpawnChance: number = 0.004, spawnChanceGrowth: number = 0.001, spawnCap: number = 5) {
+  constructor(winScore = 25, startLives= 2, growthRate = 0.3, startSpawnChance = 0.004, spawnChanceGrowth = 0.001, spawnCap = 5) {
     this.winScore = winScore;
     this.startLives = startLives;
     this.growthRate = growthRate;

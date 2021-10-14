@@ -110,7 +110,7 @@ export class SceneComponent implements AfterViewInit {
       //Explosion specific logic
       else if(e.type == EntityType.ExplosionParticle){
         const ep = <ExplosionParticle>e;
-        e.update();
+        ep.update();
       }
 
       if (!e.alive) {
@@ -247,7 +247,7 @@ export class SceneComponent implements AfterViewInit {
 
   }
 
-  updateGameSettings(settings: GameSettings){
+  updateGameSettings(settings: GameSettings): void {
     if(settings)
       this.gameSettings = settings;
   }

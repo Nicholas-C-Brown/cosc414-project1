@@ -13,7 +13,7 @@ export class InfoComponent {
   @Output() gameSettingsEmitter = new EventEmitter<GameSettings>();
 
   public updateSettings(score: number | null, lives: number | null, growthRate: number | null, startSpawnChance: number | null, spawnChanceGrowth: number | null, spawnCap: number | null): void {
-    let tempSettings = new GameSettings(
+    const tempSettings = new GameSettings(
       this.gameSettings?.winScore,
       this.gameSettings?.startLives,
       this.gameSettings?.growthRate,
