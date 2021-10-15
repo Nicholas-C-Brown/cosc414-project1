@@ -33,7 +33,7 @@ export class Poison extends Circle implements Entity {
     this.alive = false;
   }
 
-  public killBacteria(b: Bacteria){
+  public killBacteria(b: Bacteria): void {
       if(dist(b.location, this.location) < b.radius + this.radius){
         b.growthRate = -0.5;
       }

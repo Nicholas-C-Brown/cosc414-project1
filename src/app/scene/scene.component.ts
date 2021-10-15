@@ -10,8 +10,6 @@ import {ExplosionParticle} from "../../models/explosionParticle";
 import {GameSettings} from "../../models/gameSettings";
 import {Entity, EntityType} from "../../models/entity";
 import { Poison } from 'src/models/poison';
-import { ThrowStmt } from '@angular/compiler';
-//import { Console } from 'console';
 
 @Component({
   selector: 'app-scene',
@@ -88,7 +86,7 @@ export class SceneComponent implements AfterViewInit {
   }
 
   private tick(): void {
-  
+
     //Spawn bacteria
 
     this.spawnBacteria();
@@ -109,10 +107,10 @@ export class SceneComponent implements AfterViewInit {
           }
         }
       }
-      
-      
+
+
       //Explosion specific logic
-      
+
        if(e.type == EntityType.ExplosionParticle){
         const ep = <ExplosionParticle>e;
         ep.update();
@@ -132,7 +130,7 @@ export class SceneComponent implements AfterViewInit {
 
       if (!e.alive) {
         if(e.type == EntityType.Bacteria) this.score++;
-        else if(e.type = EntityType.Poison) this.poisonCount--;
+        else if(e.type == EntityType.Poison) this.poisonCount--;
         removeEntities.push(e);
       }
     }
