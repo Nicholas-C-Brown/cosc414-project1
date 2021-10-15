@@ -243,7 +243,7 @@ export class SceneComponent implements AfterViewInit {
       const direction = norm(new Vector2(-0.5 + Math.random(), -0.5 + Math.random()));
       const location = new Vector2(circle.location.x, circle.location.y);
       const radius = circle.radius/3;
-      const speed = circle.radius/3;
+      const speed = circle.radius/5;
       const color = new Color(
         circle.color.r * (0.7 + Math.random() * 0.3),
         circle.color.g * (0.7 + Math.random() * 0.3),
@@ -276,7 +276,7 @@ export class SceneComponent implements AfterViewInit {
       if (entity.type == EntityType.Bacteria) {
         const b = <Bacteria>entity;
         if (isPointInCircle(pos, b)) {
-          this.createExplosion(25, b);
+          this.createExplosion(100, b);
           b.die();
           return;
         }
@@ -285,7 +285,7 @@ export class SceneComponent implements AfterViewInit {
 
     if(this.poisonCount < 2){
       //Spray poison
-      const p = new Poison(50, 5, new Vector2(pos.x, pos.y), Color.Green, 0.3, 100);
+      const p = new Poison(50, 5, new Vector2(pos.x, pos.y), Color.Green, 0.4, 120);
       this.entities.push(p);
       this.poisonCount++;
     }

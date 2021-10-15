@@ -23,8 +23,10 @@ export class Poison extends Circle implements Entity {
   }
 
   public update(): void{
-    if(this.radius <= this.maxRadius)
+    if(this.radius <= this.maxRadius) {
       this.radius += this.growthRate;
+      this.color = new Color(this.color.r, this.color.g, this.color.b, 1-this.radius/this.maxRadius)
+    }
     else this.die();
 
   }
